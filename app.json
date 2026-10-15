@@ -19,7 +19,12 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "output": "single",
+      "favicon": "./assets/favicon.png",
+      "name": "album",
+      "shortName": "album",
+      "themeColor": "#FBF8F6",
+      "backgroundColor": "#FBF8F6"
     },
     "plugins": [
       "expo-router",
@@ -35,6 +40,9 @@
       ]
     ],
     "owner": "rm_projects",
-    "scheme": "album"
+    "scheme": "album",
+    "experiments": {
+      "baseUrl": "/clothes_album"
+    }
   }
 }

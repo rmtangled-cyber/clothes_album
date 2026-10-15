@@ -1,36 +1,24 @@
+// Native (iOS / Android) data access backed by SQLite.
+// The web build uses queries.web.ts instead, with the same exported functions.
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-export type Outfit = {
-  id: number;
-  photo: string;
-  date: string;
-  people: string;
-  memo: string;
-};
+import {
+  splitPeople,
+  type Item,
+  type ItemFilter,
+  type ItemInput,
+  type ItemWithStats,
+  type Outfit,
+  type OutfitDetail,
+  type OutfitFilter,
+  type OutfitInput,
+} from './types';
 
-export type Item = {
-  id: number;
-  name: string;
-  category: string;
-  color: string;
-  photo: string | null;
-  memo: string;
-};
-
-export type ItemWithStats = Item & {
-  wear_count: number;
-  last_worn: string | null;
-};
-
-export type OutfitInput = Omit<Outfit, 'id'> & { itemIds: number[] };
-export type ItemInput = Omit<Item, 'id'>;
+type Db = SQLiteDatabase;
 
 // ---- Outfits ----
 
-export async function listOutfits(
-  db: SQLiteDatabase,
-  filter: { person?: string; itemId?: number } = {}
-): Promise<Outfit[]> {
+export async function listOutfits(db: Db, filter: OutfitFilter = {}): Promise<Outfit[]> {
   const params: number[] = [];
   let whereSql = '';
   if (filter.itemId) {
@@ -47,7 +35,7 @@ export async function listOutfits(
   return person ? outfits.filter((o) => splitPeople(o.people).includes(person)) : outfits;
 }
 
-export async function getOutfit(db: SQLiteDatabase, id: number) {
+export async function getOutfit(db: Db, id: number): Promise<OutfitDetail | null> {
   const outfit = await db.getFirstAsync<Outfit>(
     'SELECT id, photo, date, people, memo FROM outfits WHERE id = ?',
     id
@@ -62,7 +50,7 @@ export async function getOutfit(db: SQLiteDatabase, id: number) {
   return { ...outfit, items };
 }
 
-export async function createOutfit(db: SQLiteDatabase, input: OutfitInput): Promise<number> {
+export async function createOutfit(db: Db, input: OutfitInput): Promise<number> {
   let id = 0;
   await db.withExclusiveTransactionAsync(async (txn) => {
     const result = await txn.runAsync(
@@ -80,18 +68,13 @@ export async function createOutfit(db: SQLiteDatabase, input: OutfitInput): Prom
   return id;
 }
 
-export async function deleteOutfit(db: SQLiteDatabase, id: number) {
+export async function deleteOutfit(db: Db, id: number) {
   await db.runAsync('DELETE FROM outfits WHERE id = ?', id);
 }
 
 // ---- Items ----
 
-export type ItemSort = 'newest' | 'leastRecentlyWorn' | 'mostWorn';
-
-export async function listItems(
-  db: SQLiteDatabase,
-  options: { category?: string; sort?: ItemSort } = {}
-): Promise<ItemWithStats[]> {
+export async function listItems(db: Db, options: ItemFilter = {}): Promise<ItemWithStats[]> {
   const orderBy = {
     newest: 'i.id DESC',
     // Never-worn items first, then the ones worn longest ago.
@@ -117,14 +100,14 @@ export async function listItems(
   );
 }
 
-export async function getItem(db: SQLiteDatabase, id: number) {
+export async function getItem(db: Db, id: number): Promise<Item | null> {
   return db.getFirstAsync<Item>(
     'SELECT id, name, category, color, photo, memo FROM items WHERE id = ?',
     id
   );
 }
 
-export async function createItem(db: SQLiteDatabase, input: ItemInput): Promise<number> {
+export async function createItem(db: Db, input: ItemInput): Promise<number> {
   const result = await db.runAsync(
     'INSERT INTO items (name, category, color, photo, memo) VALUES (?, ?, ?, ?, ?)',
     input.name,
@@ -136,21 +119,13 @@ export async function createItem(db: SQLiteDatabase, input: ItemInput): Promise<
   return result.lastInsertRowId;
 }
 
-export async function deleteItem(db: SQLiteDatabase, id: number) {
+export async function deleteItem(db: Db, id: number) {
   await db.runAsync('DELETE FROM items WHERE id = ?', id);
 }
 
 // ---- People ----
 
-// People are stored as a comma-separated string on each outfit.
-export function splitPeople(people: string): string[] {
-  return people
-    .split(/[,、，]/)
-    .map((p) => p.trim())
-    .filter(Boolean);
-}
-
-export async function listPeople(db: SQLiteDatabase): Promise<string[]> {
+export async function listPeople(db: Db): Promise<string[]> {
   const rows = await db.getAllAsync<{ people: string }>(
     "SELECT people FROM outfits WHERE people != '' ORDER BY date DESC"
   );

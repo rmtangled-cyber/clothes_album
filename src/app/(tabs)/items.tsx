@@ -1,14 +1,15 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Chips } from '@/components/Chips';
 import { EmptyState } from '@/components/EmptyState';
 import { FloatingButton } from '@/components/FloatingButton';
-import { listItems, type ItemSort, type ItemWithStats } from '@/db/queries';
+import { useDb } from '@/db/provider';
+import { listItems } from '@/db/queries';
+import type { ItemSort, ItemWithStats } from '@/db/types';
 import { CATEGORIES, categoryLabel } from '@/lib/categories';
 import { photoUri } from '@/lib/photos';
 import { lastWornText } from '@/lib/wear';
@@ -21,7 +22,7 @@ const SORTS = [
 ] as const;
 
 export default function ItemsScreen() {
-  const db = useSQLiteContext();
+  const db = useDb();
   const [items, setItems] = useState<ItemWithStats[]>([]);
   const [category, setCategory] = useState<string | null>(null);
   const [sort, setSort] = useState<ItemSort>('newest');

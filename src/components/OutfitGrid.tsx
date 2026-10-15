@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import type { ReactElement } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
-import type { Outfit } from '@/db/queries';
+import type { Outfit } from '@/db/types';
 import { formatDate } from '@/lib/date';
 import { photoUri } from '@/lib/photos';
 import { colors, spacing } from '@/lib/theme';

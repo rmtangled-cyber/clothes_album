@@ -1,6 +1,7 @@
 import { Directory, File, Paths } from 'expo-file-system';
 import * as ImagePicker from 'expo-image-picker';
-import { Alert } from 'react-native';
+
+import { notify } from '@/lib/dialog';
 
 // Photos are copied into the app's document directory and only the file name
 // is stored in the database. On iOS the absolute path of the app container can
@@ -47,7 +48,7 @@ export async function pickFromLibrary(): Promise<string | null> {
 export async function takePhoto(): Promise<string | null> {
   const permission = await ImagePicker.requestCameraPermissionsAsync();
   if (!permission.granted) {
-    Alert.alert('カメラを使えません', '設定アプリからカメラへのアクセスを許可してください。');
+    notify('カメラを使えません', '設定アプリからカメラへのアクセスを許可してください。');
     return null;
   }
   const result = await ImagePicker.launchCameraAsync(pickerOptions);

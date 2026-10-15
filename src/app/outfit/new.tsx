@@ -1,19 +1,21 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { DateField } from '@/components/DateField';
 import { Field, formStyles, Input, PrimaryButton } from '@/components/Form';
 import { ItemSelector } from '@/components/ItemSelector';
 import { PhotoField } from '@/components/PhotoField';
-import { createOutfit, listItems, listPeople, splitPeople, type Item } from '@/db/queries';
+import { useDb } from '@/db/provider';
+import { createOutfit, listItems, listPeople } from '@/db/queries';
+import { splitPeople, type Item } from '@/db/types';
 import { toDateString } from '@/lib/date';
+import { notify } from '@/lib/dialog';
 import { deletePhoto, savePhoto } from '@/lib/photos';
 import { colors, spacing } from '@/lib/theme';
 
 export default function NewOutfitScreen() {
-  const db = useSQLiteContext();
+  const db = useDb();
   const [photo, setPhoto] = useState<string | null>(null);
   const [date, setDate] = useState(toDateString(new Date()));
   const [people, setPeople] = useState('');
@@ -39,7 +41,7 @@ export default function NewOutfitScreen() {
 
   const save = async () => {
     if (!photo) {
-      Alert.alert('写真を選んでね', 'コーデの写真は必須です。');
+      notify('写真を選んでね', 'コーデの写真は必須です。');
       return;
     }
     setSaving(true);
@@ -56,7 +58,7 @@ export default function NewOutfitScreen() {
       router.back();
     } catch (e) {
       deletePhoto(fileName);
-      Alert.alert('保存できませんでした', String(e));
+      notify('保存できませんでした', String(e));
       setSaving(false);
     }
   };

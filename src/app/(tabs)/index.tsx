@@ -1,5 +1,4 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
 import { View } from 'react-native';
 
@@ -7,10 +6,12 @@ import { Chips } from '@/components/Chips';
 import { EmptyState } from '@/components/EmptyState';
 import { FloatingButton } from '@/components/FloatingButton';
 import { OutfitGrid } from '@/components/OutfitGrid';
-import { listOutfits, listPeople, type Outfit } from '@/db/queries';
+import { useDb } from '@/db/provider';
+import { listOutfits, listPeople } from '@/db/queries';
+import type { Outfit } from '@/db/types';
 
 export default function OutfitsScreen() {
-  const db = useSQLiteContext();
+  const db = useDb();
   const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [people, setPeople] = useState<string[]>([]);
   const [person, setPerson] = useState<string | null>(null);

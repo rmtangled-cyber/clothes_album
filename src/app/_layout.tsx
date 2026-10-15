@@ -1,13 +1,12 @@
 import { Stack } from 'expo-router';
-import { SQLiteProvider } from 'expo-sqlite';
 import { StatusBar } from 'expo-status-bar';
 
-import { migrateDb } from '@/db/migrate';
+import { DbProvider } from '@/db/provider';
 import { colors } from '@/lib/theme';
 
 export default function RootLayout() {
   return (
-    <SQLiteProvider databaseName="album.db" onInit={migrateDb}>
+    <DbProvider>
       <StatusBar style="dark" />
       <Stack
         screenOptions={{
@@ -23,6 +22,6 @@ export default function RootLayout() {
         <Stack.Screen name="item/new" options={{ title: 'アイテムを登録', presentation: 'modal' }} />
         <Stack.Screen name="item/[id]" options={{ title: 'アイテム' }} />
       </Stack>
-    </SQLiteProvider>
+    </DbProvider>
   );
 }

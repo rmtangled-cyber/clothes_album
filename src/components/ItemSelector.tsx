@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import type { Item } from '@/db/queries';
+import type { Item } from '@/db/types';
 import { CATEGORIES } from '@/lib/categories';
 import { photoUri } from '@/lib/photos';
 import { colors, spacing } from '@/lib/theme';

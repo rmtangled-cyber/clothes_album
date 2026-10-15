@@ -1,4 +1,4 @@
-import type { ItemWithStats } from '@/db/queries';
+import type { ItemWithStats } from '@/db/types';
 import { daysSince } from '@/lib/date';
 
 export function lastWornText(item: Pick<ItemWithStats, 'wear_count' | 'last_worn'>): string {

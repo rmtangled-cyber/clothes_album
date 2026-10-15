@@ -1,21 +1,22 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { DangerButton } from '@/components/Form';
+import { useDb } from '@/db/provider';
 import { deleteOutfit, getOutfit } from '@/db/queries';
 import { categoryLabel } from '@/lib/categories';
 import { formatDate } from '@/lib/date';
+import { confirmDestructive } from '@/lib/dialog';
 import { deletePhoto, photoUri } from '@/lib/photos';
 import { colors, spacing } from '@/lib/theme';
 
 type Detail = NonNullable<Awaited<ReturnType<typeof getOutfit>>>;
 
 export default function OutfitDetailScreen() {
-  const db = useSQLiteContext();
+  const db = useDb();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [outfit, setOutfit] = useState<Detail | null>(null);
 
@@ -27,19 +28,12 @@ export default function OutfitDetailScreen() {
 
   if (!outfit) return null;
 
-  const confirmDelete = () => {
-    Alert.alert('このコーデを削除しますか？', '写真も一緒に削除されます。', [
-      { text: 'キャンセル', style: 'cancel' },
-      {
-        text: '削除',
-        style: 'destructive',
-        onPress: async () => {
-          await deleteOutfit(db, outfit.id);
-          deletePhoto(outfit.photo);
-          router.back();
-        },
-      },
-    ]);
+  const confirmDelete = async () => {
+    const ok = await confirmDestructive('このコーデを削除しますか？', '写真も一緒に削除されます。', '削除');
+    if (!ok) return;
+    await deleteOutfit(db, outfit.id);
+    deletePhoto(outfit.photo);
+    router.back();
   };
 
   return (

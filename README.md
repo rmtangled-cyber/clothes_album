@@ -13,7 +13,17 @@
 
 データはすべて端末の中（SQLite＋写真ファイル）に保存されます。サーバーは使っていません。
 
-## iPhoneで動かす（Windows PC）
+## Web版で使う（いちばん手軽）
+
+https://rmtangled-cyber.github.io/clothes_album/
+
+iPhoneのSafariで開いて「共有」→「ホーム画面に追加」すると、アプリのように使えます。
+`main` ブランチにpushすると、GitHub Actionsで自動的に更新されます。
+
+- データ（記録と写真）はそのブラウザの中にだけ保存されます。別の端末やアプリ版とは共有されません
+- Safariで直接開くより、ホーム画面に追加して使う方がデータが消えにくくなります
+
+## iPhoneアプリとして動かす（Windows PC＋Expo Go）
 
 事前に必要なもの：Node.js（LTS）、Git、iPhoneに「Expo Go」アプリ。PCとiPhoneは同じWi-Fiにつなぐ。
 
@@ -43,6 +53,10 @@ npx expo start
 ## 技術メモ
 
 - Expo SDK 57 / Expo Router（画面は `src/app/`）
-- DB：expo-sqlite（`src/db/`）。スキーマ変更は `src/db/migrate.ts` にバージョンを上げて追加する
-- 写真：`expo-file-system` でアプリのドキュメントフォルダにコピーし、DBにはファイル名だけ保存（`src/lib/photos.ts`）
-- 型チェック：`npm run typecheck`
+- データ保存はiPhoneアプリ版とWeb版で実装が別（Metroのプラットフォーム拡張子で切り替え）
+  - アプリ版：expo-sqlite（`src/db/queries.ts`）。スキーマ変更は `src/db/migrate.ts` にバージョンを上げて追加する
+  - Web版：IndexedDB（`src/db/queries.web.ts`）。両方とも同じ関数を公開している
+- 写真
+  - アプリ版：アプリのドキュメントフォルダにコピーし、DBにはファイル名だけ保存（`src/lib/photos.ts`）
+  - Web版：縮小してIndexedDBに保存（`src/lib/photos.web.ts`）
+- 型チェック：`npm run typecheck`、Lint：`npm run lint`

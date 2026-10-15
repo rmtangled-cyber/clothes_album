@@ -1,17 +1,18 @@
 import { router } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
-import { Alert, ScrollView } from 'react-native';
+import { ScrollView } from 'react-native';
 
 import { Chips } from '@/components/Chips';
 import { Field, formStyles, Input, PrimaryButton } from '@/components/Form';
 import { PhotoField } from '@/components/PhotoField';
+import { useDb } from '@/db/provider';
 import { createItem } from '@/db/queries';
 import { CATEGORIES, type CategoryKey } from '@/lib/categories';
+import { notify } from '@/lib/dialog';
 import { deletePhoto, savePhoto } from '@/lib/photos';
 
 export default function NewItemScreen() {
-  const db = useSQLiteContext();
+  const db = useDb();
   const [photo, setPhoto] = useState<string | null>(null);
   const [name, setName] = useState('');
   const [category, setCategory] = useState<CategoryKey>('tops');
@@ -21,7 +22,7 @@ export default function NewItemScreen() {
 
   const save = async () => {
     if (!name.trim()) {
-      Alert.alert('名前を入れてね', '例：白のニット、デニムスカート');
+      notify('名前を入れてね', '例：白のニット、デニムスカート');
       return;
     }
     setSaving(true);
@@ -38,7 +39,7 @@ export default function NewItemScreen() {
       router.back();
     } catch (e) {
       deletePhoto(fileName);
-      Alert.alert('保存できませんでした', String(e));
+      notify('保存できませんでした', String(e));
       setSaving(false);
     }
   };
